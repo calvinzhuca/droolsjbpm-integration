@@ -61,6 +61,11 @@ public class ProcessAdminServicesClientImpl extends AbstractKieServicesClientImp
     public MigrationReportInstance migrateProcessInstance(String containerId, Long processInstanceId, String targetContainerId, String targetProcessId, Map<String, String> nodeMapping) {
         MigrationReportInstance reportInstance = null;
         if( config.isRest() ) {
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!here isRest");
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!here containerId: " + containerId);
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!here processInstanceId " + processInstanceId);
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!here targetContainerId " + targetContainerId);
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!here targetProcessId " + targetProcessId);
             Map<String, Object> valuesMap = new HashMap<String, Object>();
             valuesMap.put(CONTAINER_ID, containerId);
             valuesMap.put(PROCESS_INST_ID, processInstanceId);
@@ -68,10 +73,12 @@ public class ProcessAdminServicesClientImpl extends AbstractKieServicesClientImp
             Map<String, String> headers = new HashMap<String, String>();
 
             String queryString = "?targetContainerId=" + targetContainerId + "&targetProcessId=" + targetProcessId;
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!here queryString " + queryString);
 
             reportInstance = makeHttpPutRequestAndCreateCustomResponse(
                     build(loadBalancer.getUrl(), ADMIN_PROCESS_URI + "/" + MIGRATE_PROCESS_INST_PUT_URI, valuesMap) + queryString, nodeMapping, MigrationReportInstance.class, headers);
         } else {
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!here isJMS");
             CommandScript script = new CommandScript( Collections.singletonList(
                     (KieServerCommand) new DescriptorCommand( "ProcessAdminService", "migrateProcessInstance", serialize(safeMap(nodeMapping)), marshaller.getFormat().getType(), new Object[]{containerId, processInstanceId, targetContainerId, targetProcessId})));
             ServiceResponse<MigrationReportInstance> response = (ServiceResponse<MigrationReportInstance>) executeJmsCommand( script, DescriptorCommand.class.getName(), "BPM", containerId ).getResponses().get(0);
